@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Diálogo</title>
+<style>
+:root { color-scheme: dark; }
+html, body { height: 100%; margin: 0; background: #000; overflow: hidden; }
+body { display: flex; justify-content: center; align-items: flex-start; padding-top: calc(2vh + env(safe-area-inset-top, 0px)); box-sizing: border-box; }
+
+/* escena: los dos personajes ocupan el mismo sitio, solo se ve el que habla */
+#escena { position: relative; height: 80vh; aspect-ratio: 3 / 4; max-width: 100vw; }
+.pj { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity .45s ease; }
+.pj.activo { opacity: 1; }
+svg * { transform-box: view-box; }
+
+/* LA MADRE */
+#madre .fig { transform-origin: 258px 680px; animation: resM 5.5s ease-in-out infinite alternate, vaiM 9s ease-in-out infinite alternate; }
+@keyframes resM { from { transform: translateY(0) scale(1, 1); } to { transform: translateY(-2.5px) scale(1.002, 1.006); } }
+@keyframes vaiM { from { rotate: -.35deg; } to { rotate: .35deg; } }
+#madre .rizo { transform-origin: 312px 38px; animation: mecer 3.2s ease-in-out infinite alternate; }
+@keyframes mecer { from { rotate: -3deg; } to { rotate: 3.5deg; } }
+#madre .abiertos { animation: abrir 5.2s infinite; }
+#madre .cerrados { animation: cerrar 5.2s infinite; opacity: 0; }
+
+/* EL PADRE */
+#padre .fig { transform-origin: 540px 1390px; animation: resP 5.5s ease-in-out infinite alternate, vaiP 9s ease-in-out infinite alternate; }
+@keyframes resP { from { transform: translateY(0) scale(1, 1); } to { transform: translateY(-5px) scale(1.002, 1.006); } }
+@keyframes vaiP { from { rotate: -.3deg; } to { rotate: .3deg; } }
+#padre .abiertos { animation: abrir 6.5s infinite; }
+#padre .cerrados { animation: cerrar 6.5s infinite; opacity: 0; }
+
+/* pestañeo (compartido) */
+@keyframes abrir  { 0%, 93%, 97.5%, 100% { opacity: 1; } 94%, 97% { opacity: 0; } }
+@keyframes cerrar { 0%, 93%, 97.5%, 100% { opacity: 0; } 94%, 97% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .fig, .rizo, .abiertos, .cerrados { animation: none !important; } .cerrados { opacity: 0 !important; } }
+
+/* caja de diálogo estilo RPG */
+#caja { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(3vh + env(safe-area-inset-bottom, 0px)); width: min(92vw, 780px); min-height: 110px; box-sizing: border-box; padding: 14px 22px 18px; background: #000; border: 4px solid #fff; outline: 4px solid #000; color: #fff; font: clamp(16px, 3.8vw, 24px) / 1.45 "Courier New", Courier, monospace; }
+#nombre { font-size: .75em; color: #bbb; letter-spacing: .12em; min-height: 1.2em; }
+#texto { white-space: pre-wrap; }
+#flecha { position: absolute; right: 16px; bottom: 8px; font-size: .8em; animation: parpadeo 1s steps(2) infinite; visibility: hidden; }
+@keyframes parpadeo { 50% { opacity: 0; } }
+</style>
+</head>
+<body>
+
+<div id="escena">
+
+  <!-- LA MADRE -->
+  <svg id="madre" class="pj" viewBox="0 0 516 692" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="La madre, en blanco sobre negro">
+    <defs>
+      <filter id="lapizM" x="-2%" y="-2%" width="104%" height="104%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.025" numOctaves="2" seed="1" result="n">
+          <animate attributeName="seed" values="1;2;3;4;5;6" dur="1.2s" calcMode="discrete" repeatCount="indefinite"/>
+        </feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="2.2" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+    </defs>
+    <g class="fig" filter="url(#lapizM)">
+      <image href="madre_cuerpo.png" width="516" height="692"/>
+      <g class="rizo"><image href="madre_rizo.png" width="516" height="692"/></g>
+      <g class="abiertos"><image href="madre_ojos.png" width="516" height="692"/></g>
+      <g class="cerrados" fill="none" stroke="#f5f5f5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M204 178 Q236 200 266 182" stroke-width="3.2"/>
+        <path d="M298 177 Q324 197 352 176" stroke-width="3.2"/>
+        <g stroke-width="1.8">
+          <path d="M212 187 l-3 7 M226 193 l-1 8 M241 195 l1 8 M255 192 l3 7"/>
+          <path d="M308 187 l-2 7 M322 192 l0 8 M336 191 l2 8 M347 185 l4 6"/>
+          <path d="M204 178 l-11 -5 M206 182 l-12 4 M352 176 l11 -5 M349 181 l13 5"/>
+        </g>
+      </g>
+    </g>
+  </svg>
+
+  <!-- EL PADRE -->
+  <svg id="padre" class="pj" viewBox="0 0 1080 1414" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="El padre, en blanco sobre negro">
+    <defs>
+      <filter id="lapizP" x="-2%" y="-2%" width="104%" height="104%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.0125" numOctaves="2" seed="1" result="n">
+          <animate attributeName="seed" values="1;2;3;4;5;6" dur="1.2s" calcMode="discrete" repeatCount="indefinite"/>
+        </feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="4.5" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+    </defs>
+    <g class="fig" filter="url(#lapizP)">
+      <image href="padre_cuerpo.png" width="1080" height="1414"/>
+      <g class="abiertos"><image href="padre_ojos.png" width="1080" height="1414"/></g>
+      <g class="cerrados" fill="none" stroke="#f5f5f5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M392 478 Q450 524 508 480" stroke-width="7"/>
+        <path d="M604 480 Q660 524 716 478" stroke-width="7"/>
+        <g stroke-width="3.5" opacity=".8">
+          <path d="M408 490 q40 34 90 -2"/>
+          <path d="M618 490 q40 34 88 -2"/>
+        </g>
+      </g>
+      <ellipse cx="540" cy="408" rx="5" ry="8" fill="#2f5bff"/>
+    </g>
+  </svg>
+
+</div>
+
+<div id="caja">
+  <div id="nombre"></div>
+  <div id="texto"></div>
+  <div id="flecha">▼</div>
+</div>
+
+<script>
+/* ===== AQUÍ EDITAS LA CONVERSACIÓN =====
+   w: 'padre' | 'madre' | null (null = narración, no sale nadie) */
+const LINEAS = [
+  { w: null,    t: '* Pulsa ESPACIO (o toca la pantalla) para empezar.' },
+  { w: 'padre', t: '…Otra vez no has dormido.' },
+  { w: 'madre', t: '¿Cómo voy a dormir? Cada vez que cierro los ojos, oigo la casa.' },
+  { w: 'padre', t: 'La casa está en silencio.' },
+  { w: 'madre', t: 'Eso es justo lo que oigo.' },
+  { w: 'padre', t: 'Si quieres, me quedo contigo hasta que amanezca.' },
+  { w: 'madre', t: 'Quédate. No digas nada… solo quédate.' },
+  { w: 'padre', t: 'Aquí estoy.' },
+  { w: null,    t: '* Fin. ESPACIO para volver a empezar.' }
+];
+const NOMBRES = { padre: 'EL PADRE', madre: 'LA MADRE' };
+const TONO    = { padre: 170, madre: 480 };   // tono del "blip" de cada voz (Hz)
+
+const $ = id => document.getElementById(id);
+const sprites = document.querySelectorAll('.pj');
+let i = 0, actual = null, token = 0, tecleando = null, terminada = true, ac;
+
+function blip(f) {
+  try {
+    ac = ac || new AudioContext(); if (ac.state === 'suspended') ac.resume();
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = 'square'; o.frequency.value = f; g.gain.value = .04;
+    o.connect(g).connect(ac.destination); o.start(); o.stop(ac.currentTime + .05);
+  } catch (e) {}
+}
+
+function mostrar() {
+  const l = LINEAS[i], mio = ++token;
+  clearInterval(tecleando);
+  sprites.forEach(s => s.classList.toggle('activo', s.id === l.w));   // fundido entre personajes
+  $('nombre').textContent = l.w ? NOMBRES[l.w] : '';
+  $('texto').textContent = ''; $('flecha').style.visibility = 'hidden';
+  terminada = false;
+  const espera = l.w !== actual ? 450 : 0;   // si cambia el que habla, esperar al fundido
+  actual = l.w;
+  setTimeout(() => {
+    if (mio !== token) return;
+    let n = 0;
+    tecleando = setInterval(() => {
+      n++; $('texto').textContent = l.t.slice(0, n);
+      if (n % 2 === 0 && l.t[n - 1] !== ' ') blip(TONO[l.w] || 300);
+      if (n >= l.t.length) terminar();
+    }, 35);
+  }, espera);
+}
+
+function terminar() {
+  clearInterval(tecleando);
+  $('texto').textContent = LINEAS[i].t;
+  $('flecha').style.visibility = 'visible';
+  terminada = true;
+}
+
+function avanzar() {
+  if (!terminada) { token++; terminar(); }              // 1.º toque: completa la línea
+  else { i = (i + 1) % LINEAS.length; mostrar(); }      // 2.º toque: siguiente línea
+}
+
+addEventListener('keydown', e => {
+  if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); if (!e.repeat) avanzar(); }
+});
+addEventListener('pointerdown', avanzar);
+mostrar();
+</script>
+</body>
+</html>
